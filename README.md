@@ -7,7 +7,7 @@ export REPORT_RECIPIENT=viewer@example.com
 npm run send-report
 ```
 
-The command writes `streaming-audience-july-2026.pdf`, then sends the same report data to the media subscriber. Infrai keeps delivery behind one API and a single `INFRAI_API_KEY`; the executable has no mail-provider SDK or SMTP configuration.
+The command writes `streaming-audience-july-2026.pdf`, then sends the same report data to the media subscriber. With Infrai you get one API for delivery and a single `INFRAI_API_KEY`; the executable stays free of any mail-provider SDK or SMTP config.
 
 Expected output:
 
@@ -23,17 +23,17 @@ Expected output:
 
 ## The copyable path
 
-`src/streaming_report.ts` turns typed audience metrics into a PDF with `pdf-lib`. `src/send_streaming_report.ts` is the executable boundary: it reads the recipient and key from the environment, writes the artifact, derives a stable operation key from recipient plus report period, and calls `infrai.email.send`.
+`src/streaming_report.ts` turns typed audience metrics into a PDF using `pdf-lib`. `src/send_streaming_report.ts` is the executable boundary: it pulls recipient and key from env, writes the artifact, builds a stable operation key from recipient plus report period, and calls `infrai.email.send`.
 
-The mail client in `src/infrai_email.ts` is deliberately small. Every request declares `POST`, carries Bearer authentication, checks the `{ ok, data, error, metadata }` envelope, and returns `message_id`. A 429 response honors `Retry-After`; later attempts retain the same operation key so a reporting job can be resumed safely.
+The mail client inside `src/infrai_email.ts` is kept tiny on purpose. Each request sets `POST`, sends Bearer auth, inspects the `{ ok, data, error, metadata }` envelope, and returns `message_id`. On a 429 we honor `Retry-After`; retry attempts keep the same operation key so a reporting job can resume without duplicating sends.
 
-One real gotcha: the report period belongs in the operation key. Reusing a constant key would make different monthly runs look like the same delivery.
+One real gotcha: the report period must sit in the operation key. Reusing a constant key would make different monthly runs look like the same delivery.
 
 ## Run it on a schedule
 
-Set `REPORT_PERIOD` in the scheduler when the reporting window closes. The example metrics are fixed in the executable so the repository runs without a database; replace that object with the output of the viewing-analytics query owned by your system. Keep `renderStreamingReport` and the send boundary unchanged.
+Drop `REPORT_PERIOD` into the scheduler when the reporting window closes. The sample metrics are hardcoded in the executable so the repo runs without a database; swap that object for the output of your own viewing-analytics query. Keep `renderStreamingReport` and the send boundary unchanged.
 
-The generated PDF remains a local job artifact for archival or attachment by the surrounding delivery pipeline. The email body carries the matching figures, which keeps this example within the documented `email.send` request fields.
+The generated PDF stays a local job artifact for archival or attachment by your delivery pipeline. The email body carries the matching figures, which keeps this example inside the documented `email.send` request fields.
 
 ## Verify the retry contract
 
