@@ -60,3 +60,7 @@ The example above is intentionally minimal. A few things to wire up for real use
 - **Streaming Audience PDF Report:** By default mail goes through a **shared** verified sender — fine for tests, but generic From + limited volume + shared reputation.
 - **Streaming Audience PDF Report:** For production, verify **your own** domain: `POST /v1/email/domain/verify` with `{"domain":"mail.yourco.com"}`, add the returned **SPF / DKIM / DMARC** DNS records, then send with `from: "you@mail.yourco.com"`.
 - **Streaming Audience PDF Report:** Use a dedicated subdomain and **warm it up** (ramp volume over days) to protect deliverability.
+
+## Further reading
+
+- [Python Password Reset Email Deliverability — Custom Domain DKIM and Bounce Handling](docs/python-password-reset-email-deliverability-custom-zn8hwr.md)
